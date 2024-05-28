@@ -1,5 +1,5 @@
 from flask import Flask, request, send_from_directory, jsonify
-import os
+import os, shutil
 
 app = Flask(__name__)
 BASE_DIR = "/sync_files"
@@ -33,17 +33,29 @@ def list_public_files():
 @app.route('/download/<name>', methods=['GET'])
 def download_file(name):
     public_dir = os.path.join(BASE_DIR, 'public')
-    return send_from_directory(public_dir, name)
+    return send_from_directory(public_dir, name, as_attachment=True)
 
 @app.route('/upload/<uid>/<name>', methods=['POST'])
 def upload_file(uid, name):
-    user_dir = os.path.join(BASE_DIR, 'private', uid)
-    if not os.path.exists(user_dir):
-        os.makedirs(user_dir)
-    file = request.files['file']
-    file.save(os.path.join(user_dir, name))
-    return jsonify({"message": "File uploaded successfully"}), 201
+     # Definir las rutas de las carpetas public y private
+    carpeta_public = f"{BASE_DIR}/public"
+    carpeta_private = f"{BASE_DIR}/private/{uid}"
+    
+    # Construir las rutas completas del archivo de origen y destino
+    ruta_origen = os.path.join(carpeta_public, name)
+    ruta_destino = os.path.join(carpeta_private, name)
+    try:
+        shutil.move(ruta_origen, ruta_destino)
+        print(f"Archivo {name} movido de {carpeta_public} a {carpeta_private}")
+        return jsonify({"message": "File uploaded successfully"}), 201
+    except FileNotFoundError:
+        print(f"Archivo {name} no encontrado en {carpeta_public}")
+        return jsonify({"message": "Error"}), 500
 
+    except Exception as e:
+        print(f"Ocurrió un error al mover el archivo: {e}")
+        return jsonify({"message": "Error"}), 500
+    
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

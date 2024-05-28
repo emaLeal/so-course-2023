@@ -8,4 +8,4 @@ while True:
     with open(os.path.join("/sync_files/public", filename), 'w') as f:
         f.write(str(number))
         print("Archivo generado")
-    time.sleep(20)  # Esperar 30 minutos
+    time.sleep(1800)  # Esperar 30 minutos

@@ -14,5 +14,6 @@ COPY myapp/generador.py /sync_files/private/generador.py
 COPY . .
 # Aperturo el puerto 5000 del contenedor
 EXPOSE 5000
-# Establece el entrypoint
-CMD ["bash", "-c", "python3 ./generador.py & python3 ./app.py"]
+
+# Establecer el entrypoint
+ENTRYPOINT ["/usr/src/app/initialize.sh"]
